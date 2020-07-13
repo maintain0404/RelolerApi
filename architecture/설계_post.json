@@ -1,0 +1,12 @@
+{
+    "pk" : "{VIDEO_ID}",
+    "sk" : "PST#yyyy:MM:dd:hh:mm:ss:ffffff#00",
+    "user" : "USER_ID",
+    "post_pk" : "WITH_VIDEO|POST_ONLY",
+    "post_meta" : {
+        "title" : "String, free",
+        "video_url" : "{url}|{none}",
+        "content" : "String",
+        "nickname" : "String"
+    }
+}

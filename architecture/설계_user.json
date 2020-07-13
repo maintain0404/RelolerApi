@@ -1,0 +1,17 @@
+{
+    "PK" : "#{USER_ID}",
+    "SK" : "{nvr|gog|fbk|kko|eml}#yyyy:MM:dd:hh:mm:ss:ffffff",
+    "user" : "USER_ID",
+    "user_meta" : {
+        "open" : {
+            "nickname" : "String",
+            "most_champ" : ["champion_name"]
+        },
+        "closed" :{
+            "email" : "email_address",
+            "password" : "String",
+            "oauth" : {},
+            "riot_id" : ["String"]
+        }
+    }
+}

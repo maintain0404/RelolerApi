@@ -1,0 +1,8 @@
+{
+    "PK" : "{VIDEO_ID}",
+    "SK" : "{USR|VID|PST|CMT|PLK|CLK}#yyyy:MM:dd:hh:mm:ss:ffffff",
+    "user" : "USER_ID",
+    "video_meta" : {
+        "title" : "String, free",
+    }
+}
