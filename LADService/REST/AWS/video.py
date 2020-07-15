@@ -1,6 +1,6 @@
 from .table_base import TableBase, TableBaseList,SK
 
-class Post(TableBase):
+class Video(TableBase):
     def __init__(self):
         self.table_name = "Practice"
         self.TableIndex = None
@@ -8,13 +8,13 @@ class Post(TableBase):
         super().__init__(self.table_name)
 
     def _is_valid_meta(self, video_meta):
-        pass
+        return True
 
     def create(self, pk, video_meta):
         item = dict()
         item['pk'] = pk
         item['sk'] = SK.make('video')
-        item['post_meta'] = post_meta
+        item['video_meta'] = video_meta
         print(item)
 
         self._create_item(item)
@@ -26,6 +26,3 @@ class Post(TableBase):
         data =  self._get_item(pk, self.SK_POST + sk)
         print(data)
         return data.get('Item')
-
-    def update(self, pk, sk, post_meta):
-        pass

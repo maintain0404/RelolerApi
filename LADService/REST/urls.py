@@ -1,9 +1,9 @@
 from django.urls import path
 
-from .views import post, comment
+from .views import post, CommentListView, VideoView
 
 urlpatterns = [
     path('post/<str:pk>/<str:sk>', post, name="post_detail"),
-    path('comment/<str:pk>', comments, name="comments"),
-    path('comment/<str:pk>/<str:sk>', comment, name="comment_detail"),
+    path('comment/<str:pk>', CommentListView.as_view()),
+    path('video/<str:pk>/<str:sk>', VideoView.as_view())
 ]

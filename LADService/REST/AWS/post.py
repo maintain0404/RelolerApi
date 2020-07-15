@@ -31,7 +31,7 @@ class Post(TableBase):
     def update(self, pk, sk, post_meta):
         pass
 
-class Post(TableBaseList):
+class Posts(TableBaseList):
     def __init__(self):
         super().__init__()
 
