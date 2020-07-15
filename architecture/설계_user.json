@@ -1,17 +1,22 @@
 {
-    "PK" : "#{USER_ID}",
-    "SK" : "{nvr|gog|fbk|kko|eml}#yyyy:MM:dd:hh:mm:ss:ffffff",
-    "user" : "USER_ID",
+    "PK" : "${OAuth플랫폼}",
+    "SK" : "yyyy:MM:dd:hh:mm:ss:ffffff",
     "user_meta" : {
         "open" : {
             "nickname" : "String",
+            "nickname_updated" : "Time",
             "most_champ" : ["champion_name"]
         },
+        "optional":{
+
+        },
         "closed" :{
+            "created_post_at" : "Time",
             "email" : "email_address",
             "password" : "String",
             "oauth" : {},
-            "riot_id" : ["String"]
+            "riot_id" : ["String"],
+            "point" : "Number"
         }
     }
 }

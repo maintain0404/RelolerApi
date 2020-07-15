@@ -1,6 +1,6 @@
 {
     "PK" : "{VIDEO_ID}",
-    "SK" : "{USR|VID|PST|CMT|PLK|CLK}#yyyy:MM:dd:hh:mm:ss:ffffff#00",
+    "SK" : "CMT#yyyy:MM:dd:hh:mm:ss:ffffff#00",
     "user" : "USER_ID",
     "comment" : "{NORMAL|SUB}#{00}",
     "comment_meta" : {

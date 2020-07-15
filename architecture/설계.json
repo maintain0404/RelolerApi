@@ -2,31 +2,31 @@
     "PK" : "{VIDEO_ID}",
     "SK" : "{USR|VID|PST|CMT|PLK|CLK}#yyyy:MM:dd:hh:mm:ss:ffffff",
     "User" : "USER_ID",
-    "User_meta" : { //유저정보인경우
+    "User_meta" : {
         "opened" : {
             "nickname" : "String",
-            "signed_in" : "String",
+            "signed_in" : "String"
         },
         "closed" : {
             "type" : "{SUPER|MANAGER|NORMAL}",
             "password" : "String",
             "LOL_id" : ["id", "id"],
-            "latest_action" : "String",
+            "latest_action" : "String"
         }
     },
-    "Post" : { //게시글 정보인경우
+    "Post" : {
         "title" : "String, free",
         "content" : "String",
-        "nickname" : "String",
+        "nickname" : "String"
     },
-    "Video" : { //영상인경우
+    "Video" : {
         "url" : "String",
         "title" : "String",
         "patch_version" : "Number",
         "champion" : "Predeterminded String",
         "tags" : [ "tagname", "tagname"]
     },
-    "Comment" : { //댓글인경우
+    "Comment" : {
         "content" : "String"
-    },
+    }
 }
