@@ -1,13 +1,11 @@
-Package                  Version
------------------------- ---------
-asgiref                  3.2.7
-boto3                    1.13.16
-botocore                 1.16.16
-cachetools               4.1.0
-certifi                  2020.6.20
-chardet                  3.0.4
-Django                   3.0.6
-djangorestframework      3.11.0
+asgiref==3.2.7
+boto3==1.13.16
+botocore==1.16.16
+cachetools==4.1.0
+certifi==2020.6.20
+chardet==3.0.4
+Django==3.0.6
+djangorestframework==3.11.0
 docutils                 0.15.2
 google-api-core          1.21.0
 google-api-python-client 1.9.3
