@@ -1,7 +1,7 @@
 {
     "PK" : "${OAuth플랫폼}",
     "SK" : "yyyy:MM:dd:hh:mm:ss:ffffff",
-    "user_meta" : {
+    "user_data" : {
         "open" : {
             "nickname" : "String",
             "nickname_updated" : "Time",

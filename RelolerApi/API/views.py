@@ -11,21 +11,19 @@ from .DynamoDBWrapper.video import Video
 
 class PostView(APIView):
     def get(self, request, pk):
-        db = Post().read(pk, sk)
+        db = Post(pk, sk).read()
         if db:
             return Response(db, status = status.HTTP_200_OK)
         else:
             return Response(status.HTTP_404_NOT_FOUND)
             
+    # 수정필요
     def post(self, request, pk):
-        item = dict()
-        item['pk'] = pk
-        item['sk'] = sk
-        Post().create(item, request.data)
+        
         return Response(status.HTTP_201_CREATED)
 
     def delete(self, request, pk):
-        Post().delete(pk, sk)
+        Post(pk, sk).delete()
         return Response(status.HTTP_202_ACCEPTED)
 
 class CommentListView(APIView):

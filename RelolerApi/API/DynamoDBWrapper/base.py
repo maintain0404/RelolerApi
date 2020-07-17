@@ -1,0 +1,152 @@
+import json
+import boto3
+from boto3.dynamodb.conditions import Attr , And
+import os
+import datetime
+
+settings = json.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'access_key.json')))
+
+dynamodb = boto3.resource('dynamodb',
+    region_name = 'ap-northeast-2', # 서울
+    aws_access_key_id = settings['AWS']['Access Key ID'],
+    aws_secret_access_key = settings['AWS']['Security Access Key'],
+)   
+
+class ValidationError(Exception):
+    def __init__(self):
+        super().__init__('Invalid data')
+
+class InvaildPrimaryKeyError(Exception):
+    def __init__(self):
+        super().__init__("PK and SK must exist or must not exist simultaneously")
+
+class Validator:
+    def __init__(self, data):
+        pass
+
+class SK:
+    VIDEO = "vid#"
+    POST = "pst#"
+    COMMENT = "cmt#"
+    PLIKE = "plk#"
+    CLIKE = "clk#"
+
+    def make_new(data_type : str, time_code = None):
+        if data_type == 'video':
+            type_prefix = SK.VIDEO
+        elif data_type == 'post':
+            type_prefix = SK.POST
+        elif data_type == 'comment':
+            type_prefix = SK.COMMENT
+        elif data_type == 'post_like':
+            type_prefix = SK.PLIKE
+        elif data_type == 'comment_like':
+            type_prefix = SK.CLIKE
+        else:
+            raise ValueError('data_type "%s" is not valid data_type' % data_type)
+        return type_prefix + datetime.datetime.now().strftime('%Y:%m:%d:%H:%M:%S:%f')
+
+    def is_valid(input_sk):
+        return True
+
+class BaseItemWrapper:
+    def __init__(self, pk, sk, table_name = 'Practice', index_name = None):
+        self.table_name = table_name
+        self.table = dynamodb.Table(self.table_name)
+        self.index_name = index_name
+        self.pk = pk
+        self.sk = sk
+        self._validators = []
+        self._data = {}
+        self._data['pk'] = self.pk
+        self._data['sk'] = self.sk
+
+    @property
+    def data(self):
+        return self._data
+
+    def data_is_valid(self, raise_exception = False):
+        err = ''
+        for validator in self._validators:
+            try:
+                validator(data)
+            except Exception as error:
+                err = error
+                break
+        if err and raise_exception:
+            raise ValidationError
+        else:
+            return True
+
+    def add_validator(self, func):
+        self._validators.append(func)
+
+    def create(self):
+        if self.data_is_valid():
+            result = self.table.put_item(
+                Key = {
+                    'pk' : self.pk,
+                    'sk' : self.sk
+                },
+                Item = self._data,
+                ConditionExpression = And(Attr('sk').not_exists(), Attr('pk').ne(self.pk))
+            )
+
+    def read(self):
+        # Item에는 순전히 결과만 포함되어 있음, 추가 정보를 나중에 수정할 것
+        result = self.table.get_item(
+            Key = {
+                'pk' : self.pk,
+                'sk' : sk
+            }
+        )
+        return result.get('Item')
+
+    def update(self):
+        # 재작성 필요
+        if self.data_is_valid():
+            result = self.table.update_item(
+                Key = {
+                    'pk' : self.pk,
+                    'sk' : self.sk
+                },
+                Item = self._data
+            )
+
+    def delete(self):
+        # 지워도 되는지 검증하는 절차가 필요하지 않을까?
+        result = self.table.delete_item(
+            Key = {
+                'pk' : self.pk,
+                'sk' : self.sk
+            }
+        )
+
+class BaseQueryWrapper:
+    def __init__(self, pk, table_name="Practice", count = 30):
+        self.pk = pk
+        self.table_name = table_name
+        self.table = dynamodb.Table(table_name)
+        self.count = count
+        self._select = 'ALL_ATTRIBUTES'
+        self._attributes_to_get = []
+
+    @property
+    def atttibutes_to_get(self):
+        return self._attributes_to_get
+
+    def add_attributes_to_get(self, *args):
+        for attribute in args:
+            self._attributes_to_get.append(attribute)
+
+    def go(self, pk):
+        if not self.attributes_to_get:
+            self._select = 'ALL_ATTRIBUTES'
+        else:
+            self._select = 'SPECIFIC_ATTRIBUTES'
+        return self.table.query(
+            Limit = self.count,
+            Select = self._select,
+            KeyConditionExpression = Key('pk').eq(self.pk)
+            ScanIndexForward = False
+        )
