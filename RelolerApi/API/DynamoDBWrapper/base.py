@@ -102,7 +102,7 @@ class BaseItemWrapper:
         )
         return result.get('Item')
 
-    def update(self):
+    def update(self, attribute_names, values):
         # 재작성 필요
         if self.data_is_valid():
             result = self.table.update_item(
@@ -110,7 +110,9 @@ class BaseItemWrapper:
                     'pk' : self.pk,
                     'sk' : self.sk
                 },
-                Item = self._data
+                ReturnValues = 'ALL_NEW',
+                ExpressionAttributesValues = attribute_names,
+                UpdateExpression = values,
             )
 
     def delete(self):
@@ -130,6 +132,7 @@ class BaseQueryWrapper:
         self.count = count
         self._select = 'ALL_ATTRIBUTES'
         self._attributes_to_get = []
+        self._filter_expression = ''
 
     @property
     def atttibutes_to_get(self):
@@ -147,6 +150,7 @@ class BaseQueryWrapper:
         return self.table.query(
             Limit = self.count,
             Select = self._select,
-            KeyConditionExpression = Key('pk').eq(self.pk)
+            KeyConditionExpression = Key('pk').eq(self.pk),
+            FilterExpression = self._filter_expression
             ScanIndexForward = False
         )
