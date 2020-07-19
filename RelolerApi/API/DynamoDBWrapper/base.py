@@ -1,8 +1,9 @@
 import json
 import boto3
-from boto3.dynamodb.conditions import Attr , And
+from boto3.dynamodb.conditions import *
 import os
 import datetime
+import functools
 
 settings = json.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'access_key.json')))
 
@@ -98,7 +99,7 @@ class BaseItemWrapper:
             Key = {
                 'pk' : self.pk,
                 'sk' : sk
-            }
+            },
         )
         return result.get('Item')
 
@@ -130,7 +131,6 @@ class BaseQueryWrapper:
         self.table_name = table_name
         self.table = dynamodb.Table(table_name)
         self.count = count
-        self._select = 'ALL_ATTRIBUTES'
         self._attributes_to_get = []
         self._filter_expression = ''
 
@@ -143,14 +143,24 @@ class BaseQueryWrapper:
             self._attributes_to_get.append(attribute)
 
     def go(self, pk):
-        if not self.attributes_to_get:
-            self._select = 'ALL_ATTRIBUTES'
-        else:
-            self._select = 'SPECIFIC_ATTRIBUTES'
-        return self.table.query(
+        query_partial = functools.partial(
+            self.table.query,
             Limit = self.count,
-            Select = self._select,
             KeyConditionExpression = Key('pk').eq(self.pk),
-            FilterExpression = self._filter_expression
-            ScanIndexForward = False
+            ScanIndexForward = False,
+            FilterExpression = self._filter_expression,
+            ConsistentRead = False, # True로 바꾸면 DB의 실시간 반영이 더 엄밀해짐
         )
+        if not self.attributes_to_get:
+            return query_partial(
+                Select = 'ALL_ATTRIBUTES',
+            )
+        else:
+            projection_expression = self._attributes_to_get[0]
+            for x in self._attributes_to_get[]:
+                projection_expression = ', ' + projection_expression
+
+            return query_partial(
+                Select = 'SPECIFIC_ATTRIBUTES',
+                ProjectionExpression = projection_expression
+            )
