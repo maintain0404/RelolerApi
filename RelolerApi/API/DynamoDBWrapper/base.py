@@ -98,7 +98,7 @@ class BaseItemWrapper:
         result = self.table.get_item(
             Key = {
                 'pk' : self.pk,
-                'sk' : sk
+                'sk' : self.sk
             },
         )
         return result.get('Item')
@@ -131,36 +131,57 @@ class BaseQueryWrapper:
         self.table_name = table_name
         self.table = dynamodb.Table(table_name)
         self.count = count
+        self.exclusive_start_key = ''
         self._attributes_to_get = []
-        self._filter_expression = ''
+        self.filter_expression = None
 
     @property
-    def atttibutes_to_get(self):
+    def attributes_to_get(self):
         return self._attributes_to_get
 
     def add_attributes_to_get(self, *args):
         for attribute in args:
             self._attributes_to_get.append(attribute)
 
-    def go(self, pk):
-        query_partial = functools.partial(
-            self.table.query,
-            Limit = self.count,
-            KeyConditionExpression = Key('pk').eq(self.pk),
-            ScanIndexForward = False,
-            FilterExpression = self._filter_expression,
-            ConsistentRead = False, # True로 바꾸면 DB의 실시간 반영이 더 엄밀해짐
-        )
-        if not self.attributes_to_get:
-            return query_partial(
-                Select = 'ALL_ATTRIBUTES',
+    def go(self):
+        if self.filter_expression:
+            query_partial = functools.partial(
+                self.table.query,
+                Limit = self.count,
+                KeyConditionExpression = Key('pk').eq(self.pk),
+                ScanIndexForward = False,
+                ConsistentRead = False, # True로 바꾸면 DB의 실시간 반영이 더 엄밀해짐
             )
         else:
+            query_partial = functools.partial(
+                self.table.query,
+                Limit = self.count,
+                KeyConditionExpression = Key('pk').eq(self.pk),
+                ScanIndexForward = False,
+                FilterExpression = self.filter_expression,
+                ConsistentRead = False, # True로 바꾸면 DB의 실시간 반영이 더 엄밀해짐
+            )
+        if not self.attributes_to_get:
+            if self.exclusive_start_key:
+                return query_partial(
+                    ExclusiveStartKey = self.exclusive_start_key
+                )
+            else:
+                return query_partial()
+        else:
+            # 인덱스 오류 안나게 수정 필요
             projection_expression = self._attributes_to_get[0]
-            for x in self._attributes_to_get[]:
+            for x in self._attributes_to_get[1:]:
                 projection_expression = ', ' + projection_expression
 
-            return query_partial(
-                Select = 'SPECIFIC_ATTRIBUTES',
-                ProjectionExpression = projection_expression
-            )
+            if self.exclusive_start_key:
+                return query_partial(
+                    Select = 'SPECIFIC_ATTRIBUTES',
+                    ProjectionExpression = projection_expression,
+                    ExclusiveStartKey = self.exclusive_start_key
+                )
+            else:
+                return query_partial(
+                    Select = 'SPECIFIC_ATTRIBUTES',
+                    ProjectionExpression = projection_expression
+                )

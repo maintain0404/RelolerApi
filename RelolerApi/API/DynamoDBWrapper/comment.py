@@ -1,4 +1,4 @@
-from .base import BaseQueryWrapper, SK
+from .base import *
 
 class CommentList(BaseQueryWrapper):
     def __init__(self, pk):
