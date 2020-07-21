@@ -1,6 +1,8 @@
 {
     "PK" : "${OAuth플랫폼}",
     "SK" : "yyyy:MM:dd:hh:mm:ss:ffffff",
+    "oauth_provider" : "google",
+    "refresh_token" : "String",
     "user_data" : {
         "open" : {
             "nickname" : "String",

@@ -1,8 +1,8 @@
 {
     "pk" : "str(required,)",
-    "sk" : "str(required,PST#yyyy:MM:dd:hh:mm:ss:ffffff#00)",
+    "sk" : "str(required,PST#\\d{4}:\\d{2}:\\d{2}:\\d{2}:\\d{2}:\\d{2}:\\d{2})",
     "user" : "str(required,)",
-    "post_pk" : "str(required,[])",
+    "post_pk" : "str(required,)",
     "post_data" : {
         "title" : "str(required,)",
         "video_url" : "str(optional,)",

@@ -3,6 +3,8 @@
 import os
 import sys
 
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# oauth2는 ssl 레이어를 이용함. 이것을 허용하도록 환경변수를 설정하는 것
 
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'RelolerApi.settings')
