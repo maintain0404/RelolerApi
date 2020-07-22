@@ -7,6 +7,7 @@ from rest_framework import status
 from .DynamoDBWrapper.post import Post
 from .DynamoDBWrapper.comment import CommentList
 from .Oauth import google_auth
+from .Oauth import google_open_id
 import requests as rq
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -61,22 +62,23 @@ class CommentListView(APIView):
 class OauthView(APIView):
     def get(self, request):
         if request.GET:
+            # Oauth 인증과정
             flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
                 google_auth.secret_path,
-                scopes=['https://www.googleapis.com/auth/drive.metadata.readonly'],
-                state=request.GET['state'])
+                scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email'],
+            ) # 이 영역을 지정된 링크의 리스트로 넣음으로서 다른 권한에 접근가능
             flow.redirect_uri = 'http://127.0.0.1:8000/api'
             flow.fetch_token(authorization_response=request.build_absolute_uri())
             credentials = flow.credentials
-            print({
-                'token': credentials.token,
-                'refresh_token': credentials.refresh_token,
-                'token_uri': credentials.token_uri,
-                'client_id': credentials.client_id,
-                'client_secret': credentials.client_secret,
-                'scopes': credentials.scopes
-            })
+            print(dir(credentials))
+            print([credentials.token,
+                credentials.expired,
+                credentials.id_token,
+                credentials.scopes,
+                credentials.token_uri,
+                ])
             
         result = {}
-        result['redirect_url'] = google_auth.authorization_url
+        result['google_openid_url'] = google_open_id.openid_login_url()
+        # result['redirect_url'] = google_auth.authorization_url
         return Response(result, status.HTTP_200_OK)
