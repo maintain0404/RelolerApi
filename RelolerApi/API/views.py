@@ -68,7 +68,7 @@ class OauthView(APIView):
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile'
             ],
-            state = '12345678',
+            state = '12345678910',
         ) # 이 영역을 지정된 링크의 리스트로 넣음으로서 다른 권한에 접근가능
         flow.redirect_uri = 'http://127.0.0.1:8000/api'
         authorization_url, state = flow.authorization_url()
