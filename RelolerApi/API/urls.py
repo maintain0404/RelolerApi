@@ -6,6 +6,7 @@ urlpatterns = [
     path('post/<str:pk>/<str:sk>', PostView.as_view(), name="post_detail"),
     # path('posts/<str:pk_starts>', PostListView.as_view()),
     # path('posts/latestes',),
+    path('post/<str:pk>/<str:sk>/comment')
     path('',OauthView.as_view()),
     path('oauth', OauthView.as_view()),
     path('comment/<str:pk>', CommentListView.as_view()),
