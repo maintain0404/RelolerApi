@@ -1,9 +1,0 @@
-{
-    "PK" : "{VIDEO_ID}",
-    "SK" : "VID#yyyy:MM:dd:hh:mm:ss:ffffff",
-    "user" : "USER_ID",
-    "video_meta" : {
-        "title" : "String",
-        "tags" : ["String"]
-    }
-}

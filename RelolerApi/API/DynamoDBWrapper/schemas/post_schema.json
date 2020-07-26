@@ -1,0 +1,41 @@
+{
+    "pk" : {
+        "type" : "String",
+        "pattern" : "regex",
+        "description" : "설명"
+    },
+    "sk" : {
+        "type" : "String",
+        "pattern" : "regex",
+        "description" : "설명"
+    },
+    "user" : {
+        "type" : "String",
+        "description" : "설명"
+    },
+    "post_data" : {
+        "properties" : {
+            "post_title" : { 
+                "type" : "String"
+            },
+            "video_url" : {
+                "type" : "String"
+            },
+            "post_content" : {
+                "type" : "String"
+            },
+            "nickname" : {
+                "type" : "String"
+            },
+            "required" : [
+                "post_title",
+                "video_url",
+                "post_content",
+                "nickname"
+            ]
+        }
+    },
+    "required" : [
+        "pk", "sk", "user"
+    ]
+}
