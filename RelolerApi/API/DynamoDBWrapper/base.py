@@ -21,6 +21,10 @@ class InvaildPrimaryKeyError(Exception):
     def __init__(self):
         super().__init__("PK and SK must exist or must not exist simultaneously")
 
+class NotImplementedError(execption):
+    def __init__(self, error_msg):
+        super().__init__(error_msg)
+
 class Validator:
     def __init__(self, data):
         pass
@@ -104,17 +108,7 @@ class BaseItemWrapper:
         return result.get('Item')
 
     def update(self, attribute_names, values):
-        # 재작성 필요
-        if self.data_is_valid():
-            result = self.table.update_item(
-                Key = {
-                    'pk' : self.pk,
-                    'sk' : self.sk
-                },
-                ReturnValues = 'ALL_NEW',
-                ExpressionAttributesValues = attribute_names,
-                UpdateExpression = values,
-            )
+        raise NotImplementedError("update must be implemented")
 
     def delete(self):
         # 지워도 되는지 검증하는 절차가 필요하지 않을까?

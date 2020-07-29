@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .DynamoDBWrapper.post import Post
 from .DynamoDBWrapper.comment import CommentList
+import DynamoDBWrapper.schema_validator
 from .Oauth import google_auth
 from .Oauth import google_open_id
 import requests as rq
@@ -34,7 +35,10 @@ class PostView(APIView):
     # 수정필요
     def post(self, request, pk, sk):
         print(request.body)
-        return Response(status.HTTP_501_NOT_IMPLEMENTED)
+        if schema_validator.PostValidator.validate(request.body):
+            return Response(status.HTTP_201_CREATED)
+        else:
+            return Response(status.HTTP_406_NOT_ACCEPTABLE)
 
     def delete(self, request, pk, sk):
         Post(pk, sk).delete()

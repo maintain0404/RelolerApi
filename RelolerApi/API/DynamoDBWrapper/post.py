@@ -1,4 +1,7 @@
 from .base import *
+import jsonschema
+import os
+
 
 class Post(BaseItemWrapper):
     def __init__(self, pk = None, sk = None):
@@ -9,6 +12,8 @@ class Post(BaseItemWrapper):
         if not sk:
             sk = SK.make_new('post')
         super().__init__(pk, sk)
+
+    def update(self):
 
 class Posts(BaseQueryWrapper):
     def __init__(self, pk):
