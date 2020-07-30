@@ -6,13 +6,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from .DynamoDBWrapper.post import Post
 from .DynamoDBWrapper.comment import CommentList
-import DynamoDBWrapper.schema_validator
 from .Oauth import google_auth
 from .Oauth import google_open_id
 import requests as rq
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
-import jwt
 
 # Create your views here.
 
@@ -22,12 +20,12 @@ class PostView(APIView):
             db = Post(pk, sk).read()
         except Exception as error:
             print(error)
-            return Response(status.HTTP_404_NOT_FOUND)
+            return Response({'hello':'hi'}, status = status.HTTP_404_NOT_FOUND)
         else:
             if db:
                 return Response(db, status = status.HTTP_200_OK)
             else:
-                return Response(status.HTTP_404_NOT_FOUND)
+                return Response(status = status.HTTP_404_NOT_FOUND)
 
     def update(self, request, pk, sk):
         return Response(status.HTTP_501_NOT_IMPLEMENTED)

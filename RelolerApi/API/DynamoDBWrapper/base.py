@@ -21,7 +21,7 @@ class InvaildPrimaryKeyError(Exception):
     def __init__(self):
         super().__init__("PK and SK must exist or must not exist simultaneously")
 
-class NotImplementedError(execption):
+class NotImplementedError(Exception):
     def __init__(self, error_msg):
         super().__init__(error_msg)
 

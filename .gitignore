@@ -4,3 +4,4 @@
 /architecture
 google_client_secret.json
 access_key.json
+*.pyc

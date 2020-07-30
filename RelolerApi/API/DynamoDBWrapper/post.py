@@ -13,7 +13,6 @@ class Post(BaseItemWrapper):
             sk = SK.make_new('post')
         super().__init__(pk, sk)
 
-    def update(self):
 
 class Posts(BaseQueryWrapper):
     def __init__(self, pk):

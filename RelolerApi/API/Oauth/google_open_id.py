@@ -1,7 +1,6 @@
 import hashlib
 import json
 import os
-import jwt
 import base64
 
 gcs_json = json.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'google_client_secret.json')))
