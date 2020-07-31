@@ -1,5 +1,4 @@
 {
-    "$schema" : "http://json-schema.org/draft/2019-09/schema#",
     "PK" : {
         "type" : "String",
         "pattern" : "[0-9]{4}:[0-9]{2}:[0-9]{2}",
@@ -44,6 +43,6 @@
         }
     },
     "required" : [
-        "pk", "sk", "user", "post_data"
+        "PK", "SK", "User", "PostData"
     ]
 }

@@ -14,6 +14,6 @@ class Post(BaseItemWrapper):
         super().__init__(pk, sk)
 
 
-class Posts(BaseQueryWrapper):
-    def __init__(self, pk):
-        super().__init__(pk)
+class Posts(BaseScanWrapper):
+    def __init__(self):
+        super().__init__()

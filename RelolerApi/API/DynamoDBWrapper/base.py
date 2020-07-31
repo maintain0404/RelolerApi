@@ -119,13 +119,12 @@ class BaseItemWrapper:
             }
         )
 
-class BaseQueryWrapper:
-    def __init__(self, pk, table_name="Practice", count = 30):
-        self.pk = pk
+class QueryScanSetterMixin:
+    def __init__(self, table_name="Practice", count = 30):
         self.table_name = table_name
         self.table = dynamodb.Table(table_name)
         self.count = count
-        self.exclusive_start_key = ''
+        self.exclusive_start_key = None
         self._attributes_to_get = []
         self.filter_expression = None
 
@@ -137,45 +136,62 @@ class BaseQueryWrapper:
         for attribute in args:
             self._attributes_to_get.append(attribute)
 
-    def go(self):
-        if self.filter_expression:
-            query_partial = functools.partial(
-                self.table.query,
-                Limit = self.count,
-                KeyConditionExpression = Key('pk').eq(self.pk),
-                ScanIndexForward = False,
-                ConsistentRead = False, # True로 바꾸면 DB의 실시간 반영이 더 엄밀해짐
-            )
-        else:
-            query_partial = functools.partial(
-                self.table.query,
-                Limit = self.count,
-                KeyConditionExpression = Key('pk').eq(self.pk),
-                ScanIndexForward = False,
-                FilterExpression = self.filter_expression,
-                ConsistentRead = False, # True로 바꾸면 DB의 실시간 반영이 더 엄밀해짐
-            )
-        if not self.attributes_to_get:
-            if self.exclusive_start_key:
-                return query_partial(
-                    ExclusiveStartKey = self.exclusive_start_key
-                )
-            else:
-                return query_partial()
-        else:
-            # 인덱스 오류 안나게 수정 필요
-            projection_expression = self._attributes_to_get[0]
-            for x in self._attributes_to_get[1:]:
-                projection_expression = ', ' + projection_expression
+class BaseQueryWrapper(QueryScanSetterMixin):
+    def __init__(self, pk, table_name = "Practice", count = 30):
+        super().__init__(table_name, count)
+        self.pk = pk
 
-            if self.exclusive_start_key:
-                return query_partial(
-                    Select = 'SPECIFIC_ATTRIBUTES',
-                    ProjectionExpression = projection_expression,
-                    ExclusiveStartKey = self.exclusive_start_key
-                )
-            else:
-                return query_partial(
-                    Select = 'SPECIFIC_ATTRIBUTES',
-                    ProjectionExpression = projection_expression
-                )
+    def go(self):
+        final_query_func = functools.partial(self.table.query,
+            Limit = self.count,
+            KeyConditionExpression = self.pk,
+            ScanIndexForward = False,
+            ConsistentRead = False # True로 바꾸면 실시간 반영이 더 엄밀해짐
+        )
+        if self.filter_expression:
+            final_query_func.keywords['FilterExpression'] = self.filter_expression
+        
+        if self.exclusive_start_key:
+            final_query_func.keywords['ExclusiveStartKey'] = self.exclusive_start_key
+
+        if self.attributes_to_get:
+            projection_expression = ', '.join(self.attributes_to_get)
+            final_query_func.keywords['Select'] = 'SPECIFIC_ATTRIBUTES'
+            final_query_func.keywords['ProjectionExpression'] = projection_expression
+        
+        # 에러 핸들링 구현 필요
+        try:
+            result = final_query_func()
+        except Exception as err:
+            return None
+        else:
+            return result
+
+class BaseScanWrapper(QueryScanSetterMixin):
+    def __init__(self, table_name = "Practice", count = 30):
+        super().__init__(table_name, count)
+
+    def go(self):
+        final_scan_func = functools.partial(self.table.scan,
+            Limit = self.count,
+            ConsistentRead = False # True로 바꾸면 실시간 반영이 더 엄밀해짐
+        )
+        if self.filter_expression:
+            final_scan_func.keywords['FilterExpression'] = self.filter_expression
+        
+        if self.exclusive_start_key:
+            final_scan_func.keywords['ExclusiveStartKey'] = self.exclusive_start_key
+
+        if self.attributes_to_get:
+            projection_expression = ', '.join(self.attributes_to_get)
+            final_scan_func.keywords['Select'] = 'SPECIFIC_ATTRIBUTES'
+            final_scan_func.keywords['ProjectionExpression'] = projection_expression
+        
+        # 에러 핸들링 구현 필요
+        try:
+            result = final_scan_func()
+        except Exception as err:
+            print(err)
+            return None
+        else:
+            return result

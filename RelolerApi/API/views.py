@@ -4,13 +4,15 @@ from django.views.generic import View, TemplateView
 from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .DynamoDBWrapper.post import Post
+from .DynamoDBWrapper.post import Post, Posts
 from .DynamoDBWrapper.comment import CommentList
+from .DynamoDBWrapper.schema_validator import *
 from .Oauth import google_auth
 from .Oauth import google_open_id
 import requests as rq
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
+import json
 
 # Create your views here.
 
@@ -32,34 +34,45 @@ class PostView(APIView):
             
     # 수정필요
     def post(self, request, pk, sk):
-        print(request.body)
-        if schema_validator.PostValidator.validate(request.body):
-            return Response(status.HTTP_201_CREATED)
+        res = json.loads(request.body)
+        print(res)
+        if post_is_valid(res):
+            return Response(status = status.HTTP_201_CREATED)
         else:
-            return Response(status.HTTP_406_NOT_ACCEPTABLE)
+            return Response(status = status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, sk):
         Post(pk, sk).delete()
         return Response(status.HTTP_202_ACCEPTED)
 
+class PostListView(APIView):
+    def get(self, request):
+        try:
+            db = Posts()
+            db.add_attributes_to_get('pk','sk','post_data.title','post_data.nickname')
+        except:
+            return Response(stutus = status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(db, status = status.HTTP_200_OK)
+
 class CommentListView(APIView):
-    def get(self, request, pk):
+    def get(self, request, pk, sk = None):
         db = CommentList(pk).go()
         if db:
             return Response(db, status = status.HTTP_200_OK)
         else:
             return Response(status.HTTP_404_NOT_FOUND)
 
-    def put(self, request, pk):
+    def put(self, request, pk, sk = None):
         item = {}
         item['pk'] = pk
         CommentList(pk).put(request.data)
         return Response(status.HTTP_201_CREATED)
 
-    def patch(self, request, pk):
-        return Response(status.HTTP_501_NOT_IMPLEMENTED)
+    def patch(self, request, pk, sk):
+        return Response(stauts = status.HTTP_501_NOT_IMPLEMENTED)
 
-    def delete(self, reqeust, pk):
+    def delete(self, reqeust, pk, sk):
         return Response(status.HTTP_501_NOT_IMPLEMENTED)
 
 class OauthView(APIView):
