@@ -74,33 +74,33 @@ class CommentListView(APIView):
 
     def delete(self, reqeust, pk, sk):
         return Response(status.HTTP_501_NOT_IMPLEMENTED)
-
-class OauthView(APIView):
-    def get(self, request):
-        flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-            google_auth.secret_path,
-            scopes=['openid',
-                'https://www.googleapis.com/auth/userinfo.email',
-                'https://www.googleapis.com/auth/userinfo.profile'
-            ],
-            state = '12345678910',
-        ) # 이 영역을 지정된 링크의 리스트로 넣음으로서 다른 권한에 접근가능
-        flow.redirect_uri = 'http://127.0.0.1:8000/api'
-        authorization_url, state = flow.authorization_url()
-        if request.GET:
-            # Oauth 인증과정
+        
+# google oauth 웹용으로 쓰던 것
+# class OauthView(APIView):
+#     def get(self, request):
+#         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+#             google_auth.secret_path,
+#             scopes=['openid',
+#                 'https://www.googleapis.com/auth/userinfo.email',
+#                 'https://www.googleapis.com/auth/userinfo.profile'
+#             ],
+#             state = '12345678910',
+#         ) # 이 영역을 지정된 링크의 리스트로 넣음으로서 다른 권한에 접근가능
+#         flow.redirect_uri = 'http://127.0.0.1:8000/api'
+#         authorization_url, state = flow.authorization_url()
+#         if request.GET:
+#             # Oauth 인증과정
             
-            flow.fetch_token(authorization_response=request.build_absolute_uri())
-            credentials = flow.credentials
-            print(dir(credentials))
-            print([credentials.token,
-                credentials.expired,
-                credentials.id_token,
-                credentials.scopes,
-                credentials.token_uri,
-                ])
-            
-        result = {}
-        result['google_openid_url'] = authorization_url
-        # result['redirect_url'] = google_auth.authorization_url
-        return Response(result, status.HTTP_200_OK)
+#             flow.fetch_token(authorization_response=request.build_absolute_uri())
+#             credentials = flow.credentials
+#             print(dir(credentials))
+#             print([credentials.token,
+#                 credentials.expired,
+#                 credentials.id_token,
+#                 credentials.scopes,
+#                 credentials.token_uri,
+#                 ])
+#         result = {}
+#         result['google_openid_url'] = authorization_url
+#         # result['redirect_url'] = google_auth.authorization_url
+#         return Response(result, status.HTTP_200_OK)
