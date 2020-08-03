@@ -55,10 +55,13 @@ class SK:
         return True
 
 class BaseItemWrapper:
-    def __init__(self, pk, sk, table_name = 'Practice', index_name = None):
+    def __init__(self, pk, sk, table_name = 'Practice', index_name = None, 
+        request_type = "read", new_data = None):
         self.table_name = table_name
         self.table = dynamodb.Table(self.table_name)
         self.index_name = index_name
+        self._attributes_to_get = []
+        self.request_type = request_type
         self.pk = pk
         self.sk = sk
         self._validators = []
@@ -67,14 +70,32 @@ class BaseItemWrapper:
         self._data['sk'] = self.sk
 
     @property
+    def attributes_to_get(self):
+        assert (self.request_type == 'read' ,
+            "request_type must be 'read' to use attributes_to_get"
+        )
+        return self._attributes_to_get
+
+    def add_attributes_to_get(self, *args):
+        assert (self.request_type == 'read' ,
+            "request_type must be 'read' to use attributes_to_get"
+        )
+        for attribute in args:
+            self._attributes_to_get.append(attribute)
+
+    @property
     def data(self):
         return self._data
+
+    @property
+    def data(self, new):
+        self._data = new
 
     def data_is_valid(self, raise_exception = False):
         err = ''
         for validator in self._validators:
             try:
-                validator(data)
+                validator(self.data)
             except Exception as error:
                 err = error
                 break
@@ -99,25 +120,48 @@ class BaseItemWrapper:
 
     def read(self):
         # Item에는 순전히 결과만 포함되어 있음, 추가 정보를 나중에 수정할 것
-        result = self.table.get_item(
-            Key = {
-                'pk' : self.pk,
-                'sk' : self.sk
-            },
-        )
-        return result.get('Item')
-
-    def update(self, attribute_names, values):
-        raise NotImplementedError("update must be implemented")
-
-    def delete(self):
-        # 지워도 되는지 검증하는 절차가 필요하지 않을까?
-        result = self.table.delete_item(
+        final_func = functools.partial(self.table.get_item,
             Key = {
                 'pk' : self.pk,
                 'sk' : self.sk
             }
         )
+        if self.attributes_to_get:
+            projection_expression = ', '.join(self.attributes_to_get)
+            final_func.keywords['Select'] = 'SPECIFIC_ATTRIBUTES'
+            final_func.keywords['ProjectionExpression'] = projection_expression
+        
+        result = final_func()
+        return result.get('Item')
+
+    def update(self):
+        raise NotImplementedError("update must be implemented")
+
+    def delete(self):
+        # 지워도 되는지 검증하는 절차가 필요하지 않을까?\
+        try:
+            result = self.table.delete_item(
+                Key = {
+                    'pk' : self.pk,
+                    'sk' : self.sk
+                }
+            )
+        except Exception as err:
+            print('error on delete')
+            print(err)
+            return False
+        else:
+            return True
+
+    def go(self):
+        if self.request_type == "read":
+            return self.read()
+        elif self.request_type == 'create':
+            return self.create()
+        elif self.request_type == 'update':
+            return self.update()
+        elif self.request_type == 'delete':
+            return self.delete()
 
 class QueryScanSetterMixin:
     def __init__(self, table_name="Practice", count = 30):

@@ -11,24 +11,13 @@
     },
     "User" : {
         "type" : "String",
-        "description" : "해당 게시글의 작성자입니다."
+        "description" : "해당 댓글의 작성자입니다."
     },
-    "PostPK" : {
-        "type" : "String",
-        "pattern" : "[0-9]{4}:[0-9]{2}:[0-9]{2}",
-        "description" : "pk와 동일하며 게시글 조회를 위해 게시글에만 중복저장하는 인덱스입니다."
-    },
-    "PostData" : {
+    "CommentData" : {
         "type" : "Object",
         "description" : "게시글 제목, 내용 등의 종합 정보입니다",
         "properties" : {
-            "PostTitle" : { 
-                "type" : "String"
-            },
-            "VideoUrl" : {
-                "type" : "String"
-            },
-            "PostContent" : {
+            "CommentContent" : {
                 "type" : "String"
             },
             "Nickname" : {
@@ -43,6 +32,6 @@
         }
     },
     "required" : [
-        "PK", "SK", "User", "PostData"
+        "PK", "SK", "User", "CommentData"
     ]
 }

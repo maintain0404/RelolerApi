@@ -3,12 +3,10 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    path('post/<str:pk>/<str:sk>', PostView.as_view(), name="post_detail"),
     path('post', PostListView.as_view(), name = 'post_list'),
-    # path('posts/<str:pk_starts>', PostListView.as_view()),
-    path('oauth', OauthView.as_view()),
-    path('user/roitid'),
-    path('oauth/google', ),
-    path('comment/<str:pk>', CommentListView.as_view()),
+    path('post/<str:pk>/<str:sk>', PostView.as_view(), name="post_detail"),
+    path('post/<str:pk>/<str:sk>/comment', CommentListView.as_view()),
+    path('signup/google', OauthView.as_view()),
+    # path('user/<str:userid>/info/roitid'),
     # path('login/'),
 ]
