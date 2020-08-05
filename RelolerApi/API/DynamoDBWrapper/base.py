@@ -21,10 +21,6 @@ class InvaildPrimaryKeyError(Exception):
     def __init__(self):
         super().__init__("PK and SK must exist or must not exist simultaneously")
 
-class NotImplementedError(Exception):
-    def __init__(self, error_msg):
-        super().__init__(error_msg)
-
 class Validator:
     def __init__(self, data):
         pass
@@ -55,7 +51,7 @@ class SK:
         return True
 
 class BaseItemWrapper:
-    def __init__(self, pk, sk, table_name = 'Practice', index_name = None, 
+    def __init__(self, pk = None, sk = None, table_name = 'Practice', index_name = None, 
         request_type = "read", new_data = None):
         self.table_name = table_name
         self.table = dynamodb.Table(self.table_name)
@@ -66,8 +62,6 @@ class BaseItemWrapper:
         self.sk = sk
         self._validators = []
         self._data = {}
-        self._data['pk'] = self.pk
-        self._data['sk'] = self.sk
 
     @property
     def attributes_to_get(self):
@@ -85,13 +79,19 @@ class BaseItemWrapper:
 
     @property
     def data(self):
+        assert (self.request_type == "create" or 'update', 
+            "request_type must be 'create' or update to use data"
+        )
         return self._data
 
-    @property
+    @data.setter
     def data(self, new):
-        self._data = new
+        raise NotImplementedError("data setter must be implemented")
 
     def data_is_valid(self, raise_exception = False):
+        assert (self.request_type == "create" or 'update', 
+            "request_type must be 'create' or update to use data"
+        )
         err = ''
         for validator in self._validators:
             try:

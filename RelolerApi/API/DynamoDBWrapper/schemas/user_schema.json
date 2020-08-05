@@ -1,44 +1,57 @@
 {
-    "pk" : {
-        "type" : "string",
-        "pattern" : "USER"
-    },
-    "sk" : {
-        "type" : "string",
-        "pattern" : "google#[0-9]+",
-        "description" : "해당 유저의 고유 ID를 나타냅니다. jwt의 sub에 해당합니다."
-    },
-    "UserData" : {
-        "type" : "object",
-        "description" : "게시글 제목, 내용 등의 종합 정보입니다",
-        "properties" : {
-            "UserName" : { 
-                "type" : "string"
-            },
-            "UserEmail" : {
-                "type" : "string",
-                "format" : "email"
-            },
-            "UserLocale" : {
-                "type" : "string"
-            },
-            "Nickname" : {
-                "type" : "string"
-            },
-            "RiotID" : {
-                "type" : "array",
-                "items" : {
+    "type" : "object",
+    "properties" : {
+        "pk" : {
+            "type" : "string",
+            "pattern" : "USER"
+        },
+        "sk" : {
+            "type" : "string",
+            "description" : "고유 id를 나타냅니다."
+        },
+        "User" : {
+            "type" : "string",
+            "description" : "닉네임을 나타냅니다."
+        },
+        "ClosedUserData" : {
+            "type" : "object",
+            "description" : "비공개 정보입니다.",
+            "properties" : {
+                "Oauth" : { 
                     "type" : "string"
-                }
-            },
-            "required" : [
-                "UserName",
-                "UserEmail",
-                "UserLocale"
-            ]
+                },
+                "Email" : {
+                    "type" : "string",
+                    "format" : "email"
+                },
+                "Locale" : {
+                    "type" : "string"
+                },
+                "RiotID" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "object",
+                        "properties" :{
+                            "Name" : {"type" : "string"},
+                            "Authenticated" : {
+                                "type" : "boolean"
+                            },
+                            "IconID" : {"type":"number"},
+                            "required" : [
+                                "PUUID", "Name", "Authenticated", "IconID"
+                            ]
+                        }
+                    }
+                },
+                "required" : [
+                    "UserName",
+                    "UserEmail",
+                    "UserLocale"
+                ]
+            }
         }
     },
     "required" : [
-        "PK", "SK", "UserData"
+        "pk", "sk", "ClosedUserData"
     ]
 }

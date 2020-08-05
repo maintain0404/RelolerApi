@@ -1,19 +1,10 @@
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
-from django.views.generic import View, TemplateView
 from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .DynamoDBWrapper.post import Post, Posts
 from .DynamoDBWrapper.comment import CommentList
 from .DynamoDBWrapper.schema_validator import *
-from .Oauth import google_auth
-from .Oauth import google_open_id
-import requests as rq
-from google.oauth2 import id_token
-from google.auth.transport import requests
-import google.oauth2.credentials
-import google_auth_oauthlib.flow
+from .Oauth import google_oauth
 import json
 
 # Create your views here.
@@ -89,33 +80,21 @@ class CommentListView(APIView):
         return Response(status.HTTP_501_NOT_IMPLEMENTED)
 
 class RiotIDAuthView(APIView):
-    pass
-
+    def get(self, request):
+        if request.session.session_key:
+            return Response({"test":request.session.session_key}, status = status.HTTP_200_OK) 
+        else:
+            request.session['test'] = 'hi'
+            return Response({"test":"failed"}, status = status.HTTP_403_FORBIDDEN)   
         
 # google oauth 웹용으로 쓰던 것
-class OauthView(APIView):
+class GoogleOauthView(APIView):
     def get(self, request):
-        flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-            google_auth.secret_path,
-            scopes=['openid',
-                'https://www.googleapis.com/auth/userinfo.email',
-                'https://www.googleapis.com/auth/userinfo.profile'
-            ],
-            state = '12345678910',
-        ) # 이 영역을 지정된 링크의 리스트로 넣음으로서 다른 권한에 접근가능
-        flow.redirect_uri = 'http://127.0.0.1:8000/api/signup/google'
-        authorization_url, state = flow.authorization_url()
         if request.GET:
             # Oauth 인증과정
-            
-            flow.fetch_token(authorization_response=request.build_absolute_uri())
-            credentials = flow.credentials
-            print(dir(credentials))
-            idinfo = id_token.verify_oauth2_token(credentials.id_token, requests.Request(),
-                "1048634699120-krqt8pi3vnt0b5b6j76jhfjdmqdu2uqa.apps.googleusercontent.com")
-            print(idinfo)
-            
+            idinfo = google_oauth.verify_id_token_form_uri(request.build_absolute_uri())            
+            print(idinfo)    
         result = {}
-        result['google_openid_url'] = authorization_url
+        result['google_openid_url'] = google_oauth.authorization_url
         # result['redirect_url'] = google_auth.authorization_url
         return Response(result, status.HTTP_200_OK)
