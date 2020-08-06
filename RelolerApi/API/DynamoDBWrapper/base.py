@@ -77,16 +77,8 @@ class BaseItemWrapper:
         for attribute in args:
             self._attributes_to_get.append(attribute)
 
-    @property
-    def data(self):
-        assert (self.request_type == "create" or 'update', 
-            "request_type must be 'create' or update to use data"
-        )
-        return self._data
-
-    @data.setter
-    def data(self, new):
-        raise NotImplementedError("data setter must be implemented")
+    def to_internal(self, new_data):
+        self._data = new_data
 
     def data_is_valid(self, raise_exception = False):
         assert (self.request_type == "create" or 'update', 
@@ -95,7 +87,7 @@ class BaseItemWrapper:
         err = ''
         for validator in self._validators:
             try:
-                validator(self.data)
+                validator(self._data)
             except Exception as error:
                 err = error
                 break
@@ -117,6 +109,9 @@ class BaseItemWrapper:
                 Item = self._data,
                 ConditionExpression = And(Attr('sk').not_exists(), Attr('pk').ne(self.pk))
             )
+            return result.get('Item')
+        else:
+            return False
 
     def read(self):
         # Item에는 순전히 결과만 포함되어 있음, 추가 정보를 나중에 수정할 것

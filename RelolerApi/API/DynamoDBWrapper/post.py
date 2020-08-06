@@ -14,8 +14,7 @@ class Post(BaseItemWrapper):
 
 
     ## 데이터 요청 세팅함수
-    @data.setter
-    def data(self, new_data):
+    def to_internal(self, new_data):
         try:
             post_input_validator(instance = new_data)
         except jsonschema.exceptions.ValidationError:
@@ -43,25 +42,6 @@ class Post(BaseItemWrapper):
                 },
                 ExpressionAttributeValues = expression_attribute_values,
                 UpdateExpression = update_expression
-            )
-        except Exception as err:
-            print(err)
-            return None
-        else:
-            return result.get('Item')
-
-    def create(self, new_data):
-        self.request_type = 'read'
-        data_to_create = {}
-        data_to_create['PostData'] = new_data
-        data_to_create['User'] = 'test_user'
-        data_to_create['PostPK'] = 'testpk0'
-        data_to_create['pk'] = 'testpk0'
-        data_to_create['sk'] = SK.make_new('post')
-        try:
-            result = self.table.put_item(
-                Item = data_to_create,
-                ConditionExpression = And(Attr('sk').not_exists(), Attr('pk').ne(self.pk))
             )
         except Exception as err:
             print(err)
