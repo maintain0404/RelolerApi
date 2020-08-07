@@ -36,7 +36,7 @@ authorization_url, state = flow.authorization_url(
     include_granted_scopes='true')
 
 def verify_id_token(credentials):
-    idinfo = id_token.verify_oauth2_token(credentials, 
+    idinfo = id_token.verify_oauth2_token(credentials.id_token, 
         requests.Request(),
         secret_file['web']['client_id']
     )
