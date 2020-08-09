@@ -17,9 +17,6 @@
             "type" : "object",
             "description" : "비공개 정보입니다.",
             "properties" : {
-                "Oauth" : { 
-                    "type" : "string"
-                },
                 "Email" : {
                     "type" : "string",
                     "format" : "email"
@@ -32,6 +29,7 @@
                     "items" : {
                         "type" : "object",
                         "properties" :{
+                            "PUUID" : "string",
                             "Name" : {"type" : "string"},
                             "Authenticated" : {
                                 "type" : "boolean"

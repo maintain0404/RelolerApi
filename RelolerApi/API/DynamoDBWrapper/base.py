@@ -102,10 +102,6 @@ class BaseItemWrapper:
     def create(self):
         if self.data_is_valid():
             result = self.table.put_item(
-                Key = {
-                    'pk' : self.pk,
-                    'sk' : self.sk
-                },
                 Item = self._data,
                 ConditionExpression = And(Attr('sk').not_exists(), Attr('pk').ne(self.pk))
             )
@@ -127,6 +123,7 @@ class BaseItemWrapper:
             final_func.keywords['ProjectionExpression'] = projection_expression
         
         result = final_func()
+        print(result)
         return result.get('Item')
 
     def update(self):

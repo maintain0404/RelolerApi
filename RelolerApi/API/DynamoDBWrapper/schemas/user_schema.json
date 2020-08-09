@@ -17,14 +17,14 @@
             "type" : "object",
             "description" : "비공개 정보입니다.",
             "properties" : {
-                "Oauth" : { 
+                "UserName" : {
                     "type" : "string"
                 },
-                "Email" : {
+                "UserEmail" : {
                     "type" : "string",
                     "format" : "email"
                 },
-                "Locale" : {
+                "UserLocale" : {
                     "type" : "string"
                 },
                 "RiotID" : {
@@ -36,19 +36,19 @@
                             "Authenticated" : {
                                 "type" : "boolean"
                             },
-                            "IconID" : {"type":"number"},
-                            "required" : [
-                                "PUUID", "Name", "Authenticated", "IconID"
-                            ]
-                        }
+                            "IconID" : {"type":"number"}
+                        },
+                        "required" : [
+                            "PUUID", "Name", "Authenticated", "IconID"
+                        ]
                     }
-                },
-                "required" : [
-                    "UserName",
-                    "UserEmail",
-                    "UserLocale"
-                ]
-            }
+                }
+            },
+            "required" : [
+                "UserName",
+                "UserEmail",
+                "UserLocale"
+            ]
         }
     },
     "required" : [
