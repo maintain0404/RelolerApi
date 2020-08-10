@@ -28,19 +28,21 @@
                     "type" : "string"
                 },
                 "RiotID" : {
-                    "type" : "array",
-                    "items" : {
-                        "type" : "object",
-                        "properties" :{
-                            "Name" : {"type" : "string"},
-                            "Authenticated" : {
-                                "type" : "boolean"
+                    "type" : "object",
+                    "patternProperties" : {
+                        "^.{1, 16}$" : {
+                            "type" : "object",
+                            "properties" :{
+                                "PUUID" : {"type" : "string"},
+                                "Authenticated" : {
+                                    "type" : "boolean"
+                                },
+                                "IconID" : {"type":"number"}
                             },
-                            "IconID" : {"type":"number"}
-                        },
-                        "required" : [
-                            "PUUID", "Name", "Authenticated", "IconID"
-                        ]
+                            "required" : [
+                                "PUUID", "Authenticated", "IconID"
+                            ]
+                        }
                     }
                 }
             },

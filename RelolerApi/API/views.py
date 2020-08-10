@@ -1,10 +1,11 @@
 from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from .DynamoDBWrapper.base import DataAlreadyExistsError
 from .DynamoDBWrapper.post import Post, Posts
 from .DynamoDBWrapper.comment import CommentList
 from .DynamoDBWrapper.user import User
-from .DynamoDBWrapper.riot_auth import get_riot_id_icon
+from .DynamoDBWrapper.riot_auth import get_riot_id, set_random_icon
 from .DynamoDBWrapper.schema_validator import *
 from .Oauth import google_oauth
 import json
@@ -119,27 +120,37 @@ class RiotIDAuthView(APIView):
     def post(self, request):
         try:
             res = json.loads(request.body)
-            get_riot_id_icon(res['name'])
+            riot_id = get_riot_id(res['name'])
+            print(riot_id)
+            riot_id_dict = dict()
+            if riot_id:
+                riot_id_dict['Name'] = riot_id['name']
+                riot_id_dict['PUUID'] = riot_id['puuid']
+                riot_id_dict['IconID'] = set_random_icon(riot_id)
+                riot_id_dict['Authenticated'] = False
+            else:
+                return Response(status = status.HTTP_400_BAD_REQUEST)
             user_request = User("google#" + request.session['sub'], request_type = 'update')
-        except json.JSONDecodeError:
+            user_request.set_update_expression('SET ClosedUserData.RiotID = list_append(ClosedUserData.RiotID, :RID)')
+            user_request.add_update_values(':RID', riot_id_dict)
+            user_request.update()
+
+        except json.JSONDecodeError as err:
+            print(err)
             return Response(status = status.HTTP_400_BAD_REQUEST)
         except KeyError as err:
+            print(err)
             return Response(status = status.HTTP_400_BAD_REQUEST)
-        else:
+        except Exception as err:
             return Response(status = status.HTTP_501_NOT_IMPLEMENTED)
+        else:
+            return Response(status = status.HTTP_200_OK)
 
     def put(self, request):
-        res = json.loads(request.body)
-        icon = int(get_riot_id_icon(res['Name']))
-        icon_request = User('google#' + request.session['sub'])
-        icon_request.add_attributes_to_get('ClosedUserData.RiotID')
-        saved_id = icon_request.read()
-        print(saved_id)
         return Response(status = status.HTTP_501_NOT_IMPLEMENTED)
 
     def delete(self, request):
         return Response(status = status.HTTP_501_NOT_IMPLEMENTED)
-
 
 class SignOutView(APIView):
     def get(self, request):
@@ -158,14 +169,15 @@ class GoogleSignInView(APIView):
     def get(self, request):
         print(request.COOKIES)
         print(request.session.session_key)
+        
+        idinfo = {}
+        result = {}
         try:
-            idinfo = {}
             if request.GET.get('id_token'):
                 idinfo = google_oauth.verify_id_token(request.GET.get('id_token'))
                 user_request = User('create')
                 user_request.to_internal(idinfo)
-                user_request.create()
-                request.session['user_sk'] = '#google' + idinfo['sub'] 
+                user_request.create() 
             elif request.GET.get('state'):
                 # Oauth 인증과정
                 idinfo = google_oauth.verify_id_token_form_uri(request.build_absolute_uri())
@@ -173,11 +185,13 @@ class GoogleSignInView(APIView):
                 user_request.to_internal(idinfo)
                 user_request.create()            
                 print(idinfo)
-                request.session['user_sk'] = '#google' + idinfo['sub']
-            result = {}
-            result['google_openid_url'] = google_oauth.authorization_url
+            else:
+                result['google_openid_url'] = google_oauth.authorization_url
+        except DataAlreadyExistsError as err:
+            print(err)
+            request.session['user_sk'] = '#google' + idinfo['sub']
         except Exception as err:
             print(err)
             return Response(status = status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response(result, status.HTTP_200_OK)
+        finally:
+            return Response(result, status = status.HTTP_200_OK)

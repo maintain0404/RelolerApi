@@ -30,6 +30,3 @@ class User(BaseItemWrapper):
             self._data['ClosedUserData']['RiotID'] = []
         except Exception as err:
             raise ValidationError    
-        
-    def update(self):
-        pass

@@ -21,6 +21,10 @@ class InvaildPrimaryKeyError(Exception):
     def __init__(self):
         super().__init__("PK and SK must exist or must not exist simultaneously")
 
+class DataAlreadyExistsError(Exception):
+    def __init__(self):
+        super().__init__("Data is already exists.")
+
 class Validator:
     def __init__(self, data):
         pass
@@ -62,6 +66,8 @@ class BaseItemWrapper:
         self.sk = sk
         self._validators = []
         self._data = {}
+        self._update_expression = ''
+        self._update_values = {}
 
     @property
     def attributes_to_get(self):
@@ -76,6 +82,12 @@ class BaseItemWrapper:
         )
         for attribute in args:
             self._attributes_to_get.append(attribute)
+
+    def add_update_values(self, name, value):
+        self._update_values[name] = [value]
+
+    def set_update_expression(self, exp):
+        self._update_expression = exp
 
     def to_internal(self, new_data):
         self._data = new_data
@@ -101,11 +113,15 @@ class BaseItemWrapper:
 
     def create(self):
         if self.data_is_valid():
-            result = self.table.put_item(
-                Item = self._data,
-                ConditionExpression = And(Attr('sk').not_exists(), Attr('pk').ne(self.pk))
-            )
-            return result.get('Item')
+            try:
+                result = self.table.put_item(
+                    Item = self._data,
+                    ConditionExpression = And(Attr('sk').not_exists(), Attr('pk').ne(self.pk))
+                )
+            except Exception as err:
+                if err.__class__.__name__ == 'ConditionalCheckFailedException':
+                    raise DataAlreadyExistsError
+                return result.get('Item')
         else:
             return False
 
@@ -119,7 +135,6 @@ class BaseItemWrapper:
         )
         if self.attributes_to_get:
             projection_expression = ', '.join(self.attributes_to_get)
-            final_func.keywords['Select'] = 'SPECIFIC_ATTRIBUTES'
             final_func.keywords['ProjectionExpression'] = projection_expression
         
         result = final_func()
@@ -127,7 +142,20 @@ class BaseItemWrapper:
         return result.get('Item')
 
     def update(self):
-        raise NotImplementedError("update must be implemented")
+        try:
+            result = self.table.update_item(
+                Key = {
+                    'pk' : self.pk,
+                    'sk' : self.sk
+                },
+                ExpressionAttributeValues = self._update_values,
+                UpdateExpression = self._update_expression
+            )
+        except Exception as err:
+            print(err)
+        else:
+            return result.get('Item')
+        
 
     def delete(self):
         # 지워도 되는지 검증하는 절차가 필요하지 않을까?\
