@@ -71,10 +71,7 @@ class CommentListView(APIView):
             return Response(status.HTTP_404_NOT_FOUND)
 
     def put(self, request, pk, sk = None):
-        item = {}
-        item['pk'] = pk
-        CommentList(pk).create(request.data)
-        return Response(status.HTTP_201_CREATED)
+        return Response(status = status.HTTP_501_NOT_IMPLEMENTED)
 
     def patch(self, request, pk, sk):
         return Response(status = status.HTTP_501_NOT_IMPLEMENTED)
