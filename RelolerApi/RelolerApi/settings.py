@@ -26,9 +26,9 @@ SECRET_KEY = '2k^%70kv(+_688^b^94^v-8f9vwp#nne)40n7*1k^6v!in0zc-'
 DEBUG = False
 
 ALLOWED_HOSTS = [
+    'elasticbeanstalk.com',
     '127.0.0.1',
     'localhost',
-    'elasticbeanstalk.com',
 ]
 
 
