@@ -17,6 +17,13 @@ def get_riot_id(name):
     else:
         return None
 
+def get_riot_id_icon(name):
+    res = get_riot_id(name)
+    if res:
+        return res['profileIconId']
+    else:
+        return None
+
 def set_random_icon(riot_id_info):
     if riot_id_info['profileIconId'] < 29:
         nums = list(range(0, 29))

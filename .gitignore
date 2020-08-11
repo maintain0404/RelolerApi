@@ -5,3 +5,5 @@
 google_client_secret.json
 access_key.json
 *.pyc
+*/__pycache__/
+/RelolerApi/db.sqlite3

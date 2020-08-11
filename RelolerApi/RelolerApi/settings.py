@@ -25,7 +25,11 @@ SECRET_KEY = '2k^%70kv(+_688^b^94^v-8f9vwp#nne)40n7*1k^6v!in0zc-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'elasticbeanstalk.com',
+]
 
 
 # Application definition
@@ -120,3 +124,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# 추가됨

@@ -1,1 +1,1 @@
-from . import base, comment, user, schema_validator
+from . import base, comment, user

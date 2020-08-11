@@ -25,10 +25,6 @@ class DataAlreadyExistsError(Exception):
     def __init__(self):
         super().__init__("Data is already exists.")
 
-class Validator:
-    def __init__(self, data):
-        pass
-
 class SK:
     VIDEO = "vid#"
     POST = "pst#"
@@ -36,23 +32,23 @@ class SK:
     PLIKE = "plk#"
     CLIKE = "clk#"
 
-    def make_new(data_type : str, time_code = None):
-        if data_type == 'video':
-            type_prefix = SK.VIDEO
-        elif data_type == 'post':
-            type_prefix = SK.POST
-        elif data_type == 'comment':
-            type_prefix = SK.COMMENT
-        elif data_type == 'post_like':
-            type_prefix = SK.PLIKE
-        elif data_type == 'comment_like':
-            type_prefix = SK.CLIKE
-        else:
-            raise ValueError('data_type "%s" is not valid data_type' % data_type)
-        return type_prefix + datetime.datetime.now().strftime('%Y:%m:%d:%H:%M:%S:%f')
+def make_new_sk(data_type : str, time_code = None):
+    if data_type == 'video':
+        type_prefix = SK.VIDEO
+    elif data_type == 'post':
+        type_prefix = SK.POST
+    elif data_type == 'comment':
+        type_prefix = SK.COMMENT
+    elif data_type == 'post_like':
+        type_prefix = SK.PLIKE
+    elif data_type == 'comment_like':
+        type_prefix = SK.CLIKE
+    else:
+        raise ValueError('data_type "%s" is not valid data_type' % data_type)
+    return type_prefix + datetime.datetime.now().strftime('%Y:%m:%d:%H:%M:%S:%f')
 
-    def is_valid(input_sk):
-        return True
+def sk_is_valid(input_sk):
+    return True
 
 class BaseItemWrapper:
     def __init__(self, pk = None, sk = None, table_name = 'Practice', index_name = None, 
@@ -68,6 +64,7 @@ class BaseItemWrapper:
         self._data = {}
         self._update_expression = ''
         self._update_values = {}
+        self.update_type = 'SET'
 
     @property
     def attributes_to_get(self):
@@ -83,12 +80,25 @@ class BaseItemWrapper:
         for attribute in args:
             self._attributes_to_get.append(attribute)
 
-    def add_update_values(self, name, value):
-        self._update_values[name] = [value]
-
-    def set_update_expression(self, exp):
-        self._update_expression = exp
-
+    def update_expression(self, utype, path, value = None, overwrite = False):
+        # 26개 이하로 요청할것
+        value_key = f':{chr(len(self._update_values) + 65)}'
+        self.update_type = utype
+        if utype == 'SET':
+            self._update_values[value_key] = value
+            uexp = f'SET {path} = {value_key}'
+        elif utype == 'LIST_APPEND':
+            self._update_values[value_key] = [value]
+            uexp = f'SET {path} = list_append({path}, {value_key})'
+        elif utype == 'ADD_NUMBER':
+            self._update_values[value_key] = value
+            uexp = f'ADD {path} {value_key}' 
+        elif utype == 'REMOVE':
+            uexp = f'REMOVE {path}'
+        elif utype == 'DELETE':
+            uexp = f'DELETE {path}'
+        self._update_expression = uexp
+        
     def to_internal(self, new_data):
         self._data = new_data
 
@@ -121,6 +131,9 @@ class BaseItemWrapper:
             except Exception as err:
                 if err.__class__.__name__ == 'ConditionalCheckFailedException':
                     raise DataAlreadyExistsError
+                else:
+                    raise err
+            else:
                 return result.get('Item')
         else:
             return False
@@ -142,21 +155,22 @@ class BaseItemWrapper:
         return result.get('Item')
 
     def update(self):
-        try:
-            result = self.table.update_item(
-                Key = {
-                    'pk' : self.pk,
-                    'sk' : self.sk
-                },
-                ExpressionAttributeValues = self._update_values,
-                UpdateExpression = self._update_expression
-            )
-        except Exception as err:
-            print(err)
-        else:
-            return result.get('Item')
+        final_func = functools.partial( self.table.update_item,
+            Key = {
+                'pk' : self.pk,
+                'sk' : self.sk
+            },
+            UpdateExpression = self._update_expression
+        )
+        if self.update_type not in ('DELETE', 'REMOVE'):
+            final_func.keywords['ExpressionAttributeValues'] = self._update_values
+        print(self._update_values)
+        print(self._update_expression)
+        print(final_func.keywords)
+        result = final_func()
+    
+        return result.get('Item')
         
-
     def delete(self):
         # 지워도 되는지 검증하는 절차가 필요하지 않을까?\
         try:

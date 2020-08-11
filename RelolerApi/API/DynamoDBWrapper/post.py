@@ -12,7 +12,6 @@ class Post(BaseItemWrapper):
     def __init__(self, pk = None, sk = None):
         super().__init__(pk = pk, sk = "pst#" + sk)
 
-
     ## 데이터 요청 세팅함수
     def to_internal(self, new_data):
         try:
@@ -21,7 +20,7 @@ class Post(BaseItemWrapper):
             return False
         else:
             self._data['pk'] = 'testpk0'
-            self._data['sk'] = SK.make_new('post')
+            self._data['sk'] = make_new_sk('post')
             self._data['PostPK'] = 'testpk0'
             self._data['User'] = 'test_user'
             self._data['PostData'] = new_data
