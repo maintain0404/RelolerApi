@@ -27,6 +27,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     'elasticbeanstalk.com',
+    'reloler-api-dev22.ap-northeast-2.elasticbeanstalk.com',
     '127.0.0.1',
     'localhost',
 ]
