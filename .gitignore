@@ -7,6 +7,7 @@ access_key.json
 *.pyc
 */__pycache__/
 /RelolerApi/db.sqlite3
+RelolerApi/static
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
