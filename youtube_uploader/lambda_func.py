@@ -2,6 +2,7 @@ import pickle
 import os
 import httplib2
 import random
+import time
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from google_auth_oauthlib.flow import Flow
@@ -14,11 +15,12 @@ CLIENT_SECRETS_PATH = "C:\Projects\AutoLoLDirector\youtube_uploader\google_clien
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
+MAX_RETRIES = 2
 
 
 def build_authenticated_youtube_service(creds):
     if not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
+        if not creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = Flow.from_client_secrets_file(
@@ -39,12 +41,12 @@ def resumable_upload(insert_request):
                     print("Video id '%s' was successfully uploaded." % response['id'])
                 else:
                     exit("The upload failed with an unexpected response: %s" % response)
-        except HttpError as e:
-            if e.resp.status in RETRIABLE_STATUS_CODES:
-                error = "A retriable HTTP error %d occurred:\n%s" % (e.resp.status,
-                                                                        e.content)
-            else:
-                raise
+        # except HttpError as e:
+        #     if e.resp.status in RETRIABLE_STATUS_CODES:
+        #         error = "A retriable HTTP error %d occurred:\n%s" % (e.resp.status,
+        #                                                                 e.content)
+        #     else:
+        #         raise
         except Exception as e:
             error = "A retriable error occurred: %s" % e
 
@@ -59,9 +61,7 @@ def resumable_upload(insert_request):
             print("Sleeping %f seconds and then retrying..." % sleep_seconds)
             time.sleep(sleep_seconds)
 
-def initialize_upload(youtube, ):
-    tags = None
-
+def initialize_upload(youtube):
     body=dict(
         snippet=dict(
             title= '시범제목',
@@ -89,7 +89,7 @@ def initialize_upload(youtube, ):
         # practice, but if you're using Python older than 2.6 or if you're
         # running on App Engine, you should set the chunksize to something like
         # 1024 * 1024 (1 megabyte).
-        media_body=MediaFileUpload(options.file, chunksize=-1, resumable=True)
+        media_body=MediaFileUpload('C:\Projects\AutoLoLDirector\youtube_uploader\karthus_pentakill.webm', chunksize=-1, resumable=True)
     )
 
     resumable_upload(insert_request)
