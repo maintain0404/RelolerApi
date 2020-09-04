@@ -9,3 +9,6 @@ python manage.py runserver --settings RelolerApi.setting.develop_local
 git status로 충돌된 부분을 확인하고
 해당 파일을 수정 후 git add로 스테이징한다.
 그 후 커밋하면 머지가 완료된다.
+
+## additional commands
+curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.python.sh | bash

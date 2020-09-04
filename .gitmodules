@@ -4,3 +4,9 @@
 [submodule "youtube_uploader"]
 	path = youtube_uploader
 	url = ./youtube_uploader
+[submodule "dynamodb_wrapper"]
+	path = dynamodb_wrapper
+	url = ./dynamodb_wrapper
+[submodule "google_drive_uploader"]
+	path = google_drive_uploader
+	url = ./google_drive_uploader

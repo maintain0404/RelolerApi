@@ -1,13 +1,12 @@
-/LADService-env
-/RelolerApiEnv
-/LADService
-/architecture
 google_client_secret.json
 access_key.json
 *.pyc
 */__pycache__/
 /RelolerApi/db.sqlite3
 RelolerApi/static
+/secret_keys/
+/.vscode/
+background.webm
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
