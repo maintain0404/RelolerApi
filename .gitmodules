@@ -10,3 +10,6 @@
 [submodule "google_drive_uploader"]
 	path = google_drive_uploader
 	url = ./google_drive_uploader
+[submodule "google_api_wrapper"]
+	path = google_api_wrapper
+	url = ./google_api_wrapper

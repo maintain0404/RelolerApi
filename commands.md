@@ -12,3 +12,5 @@ git status로 충돌된 부분을 확인하고
 
 ## additional commands
 curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.python.sh | bash
+
+pwd | cat >> $(which python | xargs dirname | xargs dirname | xargs echo)/lib/python3.7/site-packages/custom_path.pth
