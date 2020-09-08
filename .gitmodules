@@ -1,6 +1,3 @@
-[submodule "RelolerApi"]
-	path = RelolerApi
-	url = ./RelolerApi
 [submodule "youtube_uploader"]
 	path = youtube_uploader
 	url = ./youtube_uploader
