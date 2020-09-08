@@ -2,6 +2,7 @@
 */__pycache__/
 /RelolerApi/db.sqlite3
 RelolerApi/static
+/secret_keys/
 /.vscode/
 background.webm
 # Elastic Beanstalk Files
