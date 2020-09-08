@@ -1,0 +1,84 @@
+[2020-09-03 08:38:14,988: INFO/MainProcess] Connected to amqp://guest:**@127.0.0.1:5672//
+[2020-09-03 08:38:14,998: INFO/MainProcess] mingle: searching for neighbors
+[2020-09-03 08:38:16,022: INFO/MainProcess] mingle: all alone
+[2020-09-03 08:38:16,076: INFO/MainProcess] celery@taein-14ZD970-GX30K ready.
+
+worker: Hitting Ctrl+C again will terminate all running tasks!
+
+worker: Warm shutdown (MainProcess)
+ 
+ -------------- celery@taein-14ZD970-GX30K v4.4.7 (cliffs)
+--- ***** ----- 
+-- ******* ---- Linux-5.4.0-42-generic-x86_64-with-Ubuntu-18.04-bionic 2020-09-03 08:38:14
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         tasks:0x7eff3372e710
+- ** ---------- .> transport:   amqp://guest:**@localhost:5672//
+- ** ---------- .> results:     disabled://
+- *** --- * --- .> concurrency: 4 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . background_uploader.drive_uploader.upload_test_video
+
+[2020-09-03 08:39:36,622: INFO/MainProcess] Connected to amqp://guest:**@127.0.0.1:5672//
+[2020-09-03 08:39:36,634: INFO/MainProcess] mingle: searching for neighbors
+[2020-09-03 08:39:37,655: INFO/MainProcess] mingle: all alone
+[2020-09-03 08:39:37,682: INFO/MainProcess] celery@taein-14ZD970-GX30K ready.
+
+worker: Hitting Ctrl+C again will terminate all running tasks!
+
+worker: Warm shutdown (MainProcess)
+
+worker: Cold shutdown (MainProcess)
+ 
+ -------------- celery@taein-14ZD970-GX30K v4.4.7 (cliffs)
+--- ***** ----- 
+-- ******* ---- Linux-5.4.0-42-generic-x86_64-with-Ubuntu-18.04-bionic 2020-09-03 08:39:36
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         tasks:0x7f7133b34ad0
+- ** ---------- .> transport:   amqp://guest:**@localhost:5672//
+- ** ---------- .> results:     disabled://
+- *** --- * --- .> concurrency: 4 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . background_uploader.drive_uploader.upload_test_video
+
+[2020-09-03 08:42:11,729: INFO/MainProcess] Connected to amqp://guest:**@127.0.0.1:5672//
+[2020-09-03 08:42:11,741: INFO/MainProcess] mingle: searching for neighbors
+[2020-09-03 08:42:12,765: INFO/MainProcess] mingle: all alone
+[2020-09-03 08:42:12,808: INFO/MainProcess] celery@taein-14ZD970-GX30K ready.
+[2020-09-03 08:43:17,209: INFO/MainProcess] Received task: background_uploader.drive_uploader.upload_test_video[4210b42f-5d93-45cc-934c-5139dc1d8567]  
+[2020-09-03 08:43:17,213: WARNING/ForkPoolWorker-3] file_cache is unavailable when using oauth2client >= 4.0.0 or google-auth
+Traceback (most recent call last):
+  File "/home/taein/.virtualenvs/RelolerApiEnv/lib/python3.7/site-packages/googleapiclient/discovery_cache/file_cache.py", line 33, in <module>
+    from oauth2client.contrib.locked_file import LockedFile
+ModuleNotFoundError: No module named 'oauth2client'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/taein/.virtualenvs/RelolerApiEnv/lib/python3.7/site-packages/googleapiclient/discovery_cache/file_cache.py", line 37, in <module>
+    from oauth2client.locked_file import LockedFile
+ModuleNotFoundError: No module named 'oauth2client'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/taein/.virtualenvs/RelolerApiEnv/lib/python3.7/site-packages/googleapiclient/discovery_cache/__init__.py", line 44, in autodetect
+    from . import file_cache
+  File "/home/taein/.virtualenvs/RelolerApiEnv/lib/python3.7/site-packages/googleapiclient/discovery_cache/file_cache.py", line 41, in <module>
+    "file_cache is unavailable when using oauth2client >= 4.0.0 or google-auth"
+ImportError: file_cache is unavailable when using oauth2client >= 4.0.0 or google-auth
+[2020-09-03 08:43:35,997: WARNING/ForkPoolWorker-3] success
+[2020-09-03 08:43:35,997: INFO/ForkPoolWorker-3] Task background_uploader.drive_uploader.upload_test_video[4210b42f-5d93-45cc-934c-5139dc1d8567] succeeded in 18.78662979799992s: 'ya29.a0AfH6SMDZzEDLnl2Itd69p_kI9JXqqtxBfF4f5fWJmz4CoJKMz4GzuQHd04-W5Jk8ImDDb9s_drst7OjJS2DmzXuD6qd1j0pNpm6pwuTkVW5VbppvRxvBBSFY3uLF5S2gRH4Dsm8kbtATDoZRqMTRVE63atzq8NwufnA  clear'
