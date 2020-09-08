@@ -1,6 +1,3 @@
-[submodule "youtube_uploader"]
-	path = youtube_uploader
-	url = ./youtube_uploader
 [submodule "dynamodb_wrapper"]
 	path = dynamodb_wrapper
 	url = ./dynamodb_wrapper

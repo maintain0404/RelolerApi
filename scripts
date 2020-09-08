@@ -1,3 +1,0 @@
-A="$(which python)"
-pwd | cat > "${A%/*/*}/lib/python3.7/site-packages/custom_path.pth"
-exit 0
