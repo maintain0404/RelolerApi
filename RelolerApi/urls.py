@@ -14,8 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.http import HttpResponseRedirect
+from django.urls import path, include, reverse
+
+def docs_redirect(request):
+    return HttpResponseRedirect(reverse('schema-redoc'))
 
 urlpatterns = [
+    path('', docs_redirect),
     path('api/', include('API.urls')),
 ]
