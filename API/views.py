@@ -1,11 +1,15 @@
 from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import JSONParser
 from dynamodb_wrapper.base import DataAlreadyExistsError
 from dynamodb_wrapper import User
-from riot_auth import get_riot_id, set_random_icon, get_riot_id_icon
+from .riot_auth import get_riot_id, set_random_icon, get_riot_id_icon
 from google_api_wrapper import oauth
 import json
+
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 # Create your views here.
 
@@ -95,6 +99,24 @@ import json
 #             return Response(status = status.HTTP_404_NOT_FOUND)            
 
 class RiotIDAuthView(APIView):
+    '''
+        계정의 라이엇 ID 정보
+        로그인이 필요함
+    '''
+    parser_classes = (JSONParser,)
+    post_schema = openapi.Schema(
+        properties = [openapi.Schema(
+            title = 'name',
+            type = openapi.TYPE_STRING
+        )],
+        type = openapi.TYPE_OBJECT
+    )
+    param_name_hint = openapi.Parameter(
+        'name',
+        openapi.IN_BODY,
+        description = '라이엇 닉네임',
+        type = openapi.TYPE_STRING,
+    )
     def get(self, request):
         try:
             print(request.session.items())
@@ -129,6 +151,10 @@ class RiotIDAuthView(APIView):
         else:
             return Response(final_res, status = status.HTTP_200_OK)
 
+    # @swagger_auto_schema(
+    #     manual_parameters = [param_name_hint],
+    #     reqeust_body = post_schema
+    # )
     def post(self, request):
         try:
             res = json.loads(request.body)
@@ -181,6 +207,16 @@ class RiotIDAuthView(APIView):
             return Response(status = status.HTTP_200_OK)
 
 class SignOutView(APIView):
+    '''
+        모든 로그인 세션 삭제
+    '''
+    @swagger_auto_schema(
+        operation_id = 'signout',
+        responses = {
+            200 : '세션 삭제 성공',
+            400 : '세션 삭제 실패'
+        }
+    )
     def get(self, request):
         try:
             request.session.flush()
@@ -191,6 +227,17 @@ class SignOutView(APIView):
             return Response(status = status.HTTP_200_OK)
 
 class UuidSignInView(APIView):
+    '''
+        UUID를 통한 로그인
+    '''
+
+    param_uuid_hint = openapi.Parameter(
+        'uuid',
+        openapi.IN_QUERY,
+        description = 'android uuid',
+        type = openapi.TYPE_STRING
+    )
+    @swagger_auto_schema(manual_parameters=[param_uuid_hint])
     def get(self, request, uuid):
         user_info = User.read(
             pk = 'USER', sk = uuid
@@ -213,8 +260,43 @@ class UuidSignInView(APIView):
         request.session['user_sk'] = f'uuid#{uuid}'
         return Response(status = status.HTTP_200_OK)
 
+class GoogleSignInUriView(APIView):
+    '''
+        구글 Oauth 로그인 페이지 URI를 반환
+    '''
+    param_redirect_uri_hint = openapi.Parameter(
+        'redirect_uri',
+        openapi.IN_QUERY,
+        description = '로그인 과정이 끝난 후 리다이렉트될 uri',
+        type = openapi.TYPE_STRING
+    )
+    @swagger_auto_schema(
+        manual_parameters=[param_redirect_uri_hint]
+    )
+    def get(self, request):
+        result = {}
+        result['google_openid_url'] = oauth.authorization_url
+        return Response(result, status = status.HTTP_200_OK)
+
 # google oauth 웹용으로 쓰던 것
 class GoogleSignInView(APIView):
+    '''
+        구글 Oauth 로그인
+        UUID를 통해 로그인 되어 있다면 UUID 로그인 정보가 구글로그인으로 교체되고
+        더 이상 해당 UUID 로그인은 불가능해짐
+
+        아무런 파라미터가 없을 경우 구글 로그인 url을 제공함.
+    '''
+    param_google_token_hint = openapi.Parameter(
+        'google_token',
+        openapi.IN_QUERY,
+        description = 'google oauth 액세스 토큰',
+        type = openapi.TYPE_STRING
+    )
+    
+    @swagger_auto_schema(
+        operation_id = 'google_signin',
+        manual_parameters=[param_google_token_hint])
     def get(self, request):
         idinfo = {}
         result = {}
