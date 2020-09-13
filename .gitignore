@@ -3,7 +3,6 @@
 /RelolerApi/db.sqlite3
 RelolerApi/static
 /.vscode/
-/secret_keys/
 background.webm
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
