@@ -105,10 +105,10 @@ class RiotIDAuthView(APIView):
     '''
     parser_classes = (JSONParser,)
     post_schema = openapi.Schema(
-        properties = [openapi.Schema(
-            title = 'name',
-            type = openapi.TYPE_STRING
-        )],
+        properties = {'name' : openapi.Schema(
+            type = openapi.TYPE_STRING,
+            description = '라이엇 계정 닉네임'
+        )},
         type = openapi.TYPE_OBJECT
     )
     param_name_hint = openapi.Parameter(
@@ -116,6 +116,15 @@ class RiotIDAuthView(APIView):
         openapi.IN_BODY,
         description = '라이엇 닉네임',
         type = openapi.TYPE_STRING,
+    )
+    @swagger_auto_schema(
+        operation_id = "User_RiotID_LIST",
+        operation_description = "계정에 연결된 라이엇 계정 조회",
+        responses = {
+            200 : "조회 성공",
+            400 : "조회 실패",
+            401 : "로그인 상태가 아님"
+        }
     )
     def get(self, request):
         try:
@@ -151,10 +160,15 @@ class RiotIDAuthView(APIView):
         else:
             return Response(final_res, status = status.HTTP_200_OK)
 
-    # @swagger_auto_schema(
-    #     manual_parameters = [param_name_hint],
-    #     reqeust_body = post_schema
-    # )
+    @swagger_auto_schema(
+        request_body = post_schema,
+        operation_id = "USER_RiotID_ADD",
+        operation_description = "계정에 라이엇 아이디 추가",
+        responses = {
+            200 : "계정에 새 라이엇 아이디 연결 성공",
+            400 : "계정에 새 라이엇 아이디 연결 실패"
+        }
+    )
     def post(self, request):
         try:
             res = json.loads(request.body)
@@ -188,7 +202,15 @@ class RiotIDAuthView(APIView):
             return Response(status = status.HTTP_501_NOT_IMPLEMENTED)
         else:
             return Response(status = status.HTTP_200_OK)
-
+    @swagger_auto_schema(
+        request_body = post_schema,
+        operation_id = 'User_RiotID_DELETE',
+        operation_description = "계정에 연결된 라이엇 아이디 연결 해제",
+        responses = {
+            200 : "연결 해제 성공",
+            400 : "연결 해제 실패"
+        }
+    )
     def delete(self, request):
         try:
             idx = str(request.GET.get('riot_id_index'))
@@ -211,7 +233,7 @@ class SignOutView(APIView):
         모든 로그인 세션 삭제
     '''
     @swagger_auto_schema(
-        operation_id = 'signout',
+        operation_id = 'Signout',
         responses = {
             200 : '세션 삭제 성공',
             400 : '세션 삭제 실패'
@@ -237,7 +259,15 @@ class UuidSignInView(APIView):
         description = 'android uuid',
         type = openapi.TYPE_STRING
     )
-    @swagger_auto_schema(manual_parameters=[param_uuid_hint])
+    @swagger_auto_schema(
+        operation_id = "SignIn_UUID",
+        operation_description = "UUID를 통해 계정에 로그인",
+        manual_parameters=[param_uuid_hint],
+        responses = {
+            200 : "로그인 성공",
+            400 : "로그인 실패"
+        }
+    )
     def get(self, request, uuid):
         user_info = User.read(
             pk = 'USER', sk = uuid
@@ -270,12 +300,29 @@ class GoogleSignInUriView(APIView):
         description = '로그인 과정이 끝난 후 리다이렉트될 uri',
         type = openapi.TYPE_STRING
     )
+    response_redirect_uri = openapi.Schema(
+        type = openapi.TYPE_OBJECT,
+        propreties = {
+            'google_openid_uri' : openapi.Schema(
+                type = openapi.TYPE_STRING,
+                description = "구글 로그인 URI"
+            )
+        },
+        required = ['google_openid_uri']
+    )
+
     @swagger_auto_schema(
-        manual_parameters=[param_redirect_uri_hint]
+        operation_id = "SignIn_Google_URI",
+        operation_description = "구글 로그인 페이지 URI",
+        manual_parameters=[param_redirect_uri_hint],
+        responses = {
+            200 : response_redirect_uri,
+            400 : 'URI 받아오기 실패'
+        }
     )
     def get(self, request):
         result = {}
-        result['google_openid_url'] = oauth.authorization_url
+        result['google_openid_uri'] = oauth.authorization_url
         return Response(result, status = status.HTTP_200_OK)
 
 # google oauth 웹용으로 쓰던 것
@@ -295,8 +342,13 @@ class GoogleSignInView(APIView):
     )
     
     @swagger_auto_schema(
-        operation_id = 'google_signin',
-        manual_parameters=[param_google_token_hint])
+        operation_id = 'SignIn_Google',
+        operation_description = "토큰 방식 및 코드 방식의 구글 Oauth 로그인 처리",
+        manual_parameters=[param_google_token_hint],
+        responses = {
+            200 : "구글 로그인 성공",
+            401 : "유효하지 않은 토큰 혹은 코드"
+        })
     def get(self, request):
         idinfo = {}
         result = {}
