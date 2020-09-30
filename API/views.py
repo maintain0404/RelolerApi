@@ -11,6 +11,9 @@ import json
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
+import background
+from google_api_wrapper import drive 
+
 # Create your views here.
 
 # class PostView(APIView):
@@ -400,5 +403,25 @@ class GoogleSignInView(APIView):
                 }]
             )
         request.session['user_sk'] = f"google#{idinfo['sub']}"
+        request.session['google_access_token'] = idinfo['access_token']
 
         return Response(result, status = status.HTTP_200_OK)
+
+class GoogleDriveView(APIView):
+    def get(self, request):
+        return Response(
+            drive.Drive(
+                request.session['google_access_token']
+            ).list()
+            ,
+            status = status.HTTP_200_OK
+        )
+
+    def post(self):
+        pass
+
+    def put(self):
+        pass
+
+    def delete(self):
+        pass

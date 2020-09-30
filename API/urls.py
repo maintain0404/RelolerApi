@@ -14,6 +14,7 @@ urlpatterns = [
     path('signin/google', GoogleSignInView.as_view()),
     path('signout', SignOutView.as_view()),
     path('user/riotid', RiotIDAuthView.as_view()),
+    path('user/gdrive', GoogleDriveView.as_view())
 ]
 
 if settings.DEBUG:
