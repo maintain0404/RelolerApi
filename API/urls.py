@@ -13,6 +13,7 @@ urlpatterns = [
     path('signin/google/uri', GoogleSignInUriView.as_view()),
     path('signin/google', GoogleSignInView.as_view()),
     path('signout', SignOutView.as_view()),
+    path('user/<str:logintype>/<str:userid>', UserInfoView.as_view()),
     path('user/riotid', RiotIDAuthView.as_view()),
     path('user/gdrive', GoogleDriveView.as_view())
 ]

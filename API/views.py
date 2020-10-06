@@ -383,7 +383,7 @@ class GoogleSignInView(APIView):
                 data = {
                     'pk' : 'USER',
                     'sk' : f'google#{idinfo["sub"]}',
-                    'User' : 'nickname',
+                    'User' : '',
                     'ClosedUserData' : {
                         'UserEmail' : idinfo['email'] if idinfo.get('email') else '',
                         'UserName' : idinfo['name'],
@@ -394,9 +394,9 @@ class GoogleSignInView(APIView):
             ).execute()
         
         # change uuid search key to google search key
-        elif 'uuid' in user_info['Item']['sk']:
+        elif 'uuid' in user_info['sk']:
             User.update(
-                pk = 'USER', sk = user_info['Item']['sk'],
+                pk = 'USER', sk = user_info['sk'],
                 expressions = [{
                     'utype' : 'SET', 'path' : 'sk', 'value' : f"google#{idinfo['sub']}",
                     'overwrite' : True
@@ -404,8 +404,80 @@ class GoogleSignInView(APIView):
             )
         request.session['user_sk'] = f"google#{idinfo['sub']}"
         request.session['google_access_token'] = idinfo['access_token']
-
+        
         return Response(result, status = status.HTTP_200_OK)
+
+class UserInfoView(APIView):
+    userinfo_schema = openapi.Schema(
+        type = openapi.TYPE_OBJECT,
+        propreties = {
+            'nickname' : openapi.Schema(
+                type = openapi.TYPE_STRING,
+                description = "사용할 닉네임"
+            )
+        },
+        required = ['nickname']
+    )
+    
+    @swagger_auto_schema(
+        operation_id = 'UserInfo_GET',
+        operation_description = "유저 정보 확인하기, 자신의 계정이라면 추가로 정보가 보임",
+        responses = {
+            200 : "구글 로그인 성공",
+            404 : "존재하지 않는 유저 혹은 기타 에러"
+        })
+    def get(self, request, logintype, userid, *args, **kargs):
+        atbt2get = ['User']
+        print(userid)
+        if request.session['user_sk'] == f'{logintype}#{userid}':
+            atbt2get.append('ClosedUserData')
+        try:
+            res = User.read(
+                pk = 'USER',
+                sk = f'{logintype}#{userid}',
+                attributes_to_get = atbt2get
+            ).execute()
+        except Exception as err:
+            print(err)
+            return Response(status = status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(res, status = status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        request_body = userinfo_schema,
+        operation_id = 'UserInfo_PUT',
+        operation_description = "토큰 방식 및 코드 방식의 구글 Oauth 로그인 처리",
+        responses = {
+            200 : "구글 로그인 성공",
+            401 : "자신이 아닌 다른 유저 정보에 접근",
+            404 : "존재하지 않는 유저 혹은 기타 에러"
+        })
+    def put(self, request, userid, *args, **kargs):
+        if request.session['user_sk'] != userid:
+            return Response(status = status.HTTP_401_UNAUTHORIZED)
+
+        if request.POST.get('nickname'):
+            try:
+                User.update(
+                    pk = 'USER',
+                    sk = userid,
+                    expressions = [{
+                            'utype' : 'SET',
+                            'path' : 'User',
+                            'nickname': request.POST.get('nickname'),
+                            'overwrite': True
+                        }
+                    ]
+                )
+            except Exception as err:
+                print(err)
+                return Response(status = status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(status = status.HTTP_200_OK)
+        else:
+            return Response(status = status.HTTP_400_BAD_REQUEST)
+
+        
 
 class GoogleDriveView(APIView):
     @swagger_auto_schema(
