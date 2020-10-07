@@ -8,7 +8,8 @@ ALLOWED_HOSTS = [
     'relolerapi-env.eba-r394bymg.ap-northeast-2.elasticbeanstalk.com',
     '127.0.0.1',
     'localhost',
-    ### Elastic Load Balancer private IP
+    ### EC2 private IP
+    "172.31.34.104",
 ]
 
 def get_elb_private_ips():
@@ -44,5 +45,3 @@ def get_elb_private_ips():
         return private_ips
     except Exception:
         return []
-
-ALLOWED_HOSTS += get_elb_private_ips()
