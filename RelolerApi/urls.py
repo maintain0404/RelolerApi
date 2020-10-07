@@ -21,6 +21,6 @@ def docs_redirect(request):
     return HttpResponseRedirect(reverse('schema-redoc'))
 
 urlpatterns = [
-    path('', docs_redirect),
-    path('api/', include('API.urls')),
+    path('', include('API.urls')),
+    # path('api/', include('API.urls')),
 ]

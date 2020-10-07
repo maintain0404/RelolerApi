@@ -4,13 +4,14 @@ from rest_framework import status
 from rest_framework.parsers import JSONParser
 from dynamodb_wrapper.base import DataAlreadyExistsError
 from dynamodb_wrapper import User
-from .riot_auth import get_riot_id, set_random_icon, get_riot_id_icon
 from google_api_wrapper import oauth
 import json
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
+
+from .riot_auth import get_riot_id, set_random_icon, get_riot_id_icon
 import background
 from google_api_wrapper import drive 
 
@@ -476,9 +477,7 @@ class UserInfoView(APIView):
                 return Response(status = status.HTTP_200_OK)
         else:
             return Response(status = status.HTTP_400_BAD_REQUEST)
-
-        
-
+    
 class GoogleDriveView(APIView):
     @swagger_auto_schema(
         operation_id = 'GoogleDrive_List',
