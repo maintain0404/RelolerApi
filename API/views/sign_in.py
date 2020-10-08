@@ -98,14 +98,23 @@ class GoogleSignInUriView(APIView):
         operation_description = "구글 로그인 페이지 URI",
         manual_parameters=[param_redirect_uri_hint],
         responses = {
-            200 : response_redirect_uri,
-            400 : 'URI 받아오기 실패'
+            200: response_redirect_uri,
+            400: 'URI 받기 실패',
+            406: '잘못된 redirect_uri 지정'
         }
     )
     def get(self, request):
         result = {}
-        result['google_openid_uri'] = oauth.authorization_url
-        return Response(result, status = status.HTTP_200_OK)
+        try:
+            result['google_openid_uri'] = oauth.build_authorization_url(
+                request.GET.get("redirect_uri")
+            )
+        except oauth.InvalidRedirectError:
+            return Response(status = status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response(status = status.HTTP_406_NOT_ACCEPTABLE)
+        else:
+            return Response(result, status = status.HTTP_200_OK)
 
 # google oauth 웹용으로 쓰던 것
 class GoogleSignInView(APIView):
