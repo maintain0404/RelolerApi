@@ -131,13 +131,27 @@ class GoogleSignInView(APIView):
         description = 'google oauth 액세스 토큰',
         type = openapi.TYPE_STRING
     )
+    response_user_exists = openapi.Schema(
+        type = openapi.TYPE_OBJECT,
+        properties={
+            'user_exists': openapi.Schema(
+                type= openapi.TYPE_BOOLEAN,
+                description="이미 가입해 닉네임 등의 유저 정보가 있는지 여부"
+            ),
+            'nickname': openapi.Schema(
+                type= openapi.TYPE_STRING,
+                description="유저 닉네임, user_exists가 거짓이면 반환되지 않음"
+            )
+        },
+        required=['user_exists']
+    )
     
     @swagger_auto_schema(
         operation_id = 'SignIn_Google',
         operation_description = "토큰 방식 및 코드 방식의 구글 Oauth 로그인 처리",
         manual_parameters=[param_google_token_hint],
         responses = {
-            200 : "구글 로그인 성공",
+            200 : response_user_exists,
             401 : "유효하지 않은 토큰 혹은 코드"
         })
     def get(self, request):
@@ -150,9 +164,8 @@ class GoogleSignInView(APIView):
             elif request.GET.get('state'):
                 idinfo = oauth.get_info_from_uri(request.build_absolute_uri())
             else:
-                result['google_openid_url'] = oauth.authorization_url
-                return Response(result, status = status.HTTP_200_OK)
-        except oauth.InvalidTokenError as err:
+                return Response(result, status = status.HTTP_400_BAD_REQUEST)
+        except oauth.InvalidTokenError:
             return Response(status = status.HTTP_401_UNAUTHORIZED)
         
         # read whether data exists or not
@@ -165,8 +178,12 @@ class GoogleSignInView(APIView):
                 pk = 'USER', sk = f"uuid#{request.GET['uuid']}",
             ).execute()
         
+        result['user_exists'] = True
         # create data if not exists
-        if user_info is None:
+        # 구글 로그인만 하고 가입하지 않을 경우 자동삭제 필요
+        # 만료시한을 걸어놓고 최종가입 때 해지하는 방법이 필요
+        if user_info is None or user_info.get('User') == '':
+            result['user_exists'] = False
             User.create(
                 data = {
                     'pk' : 'USER',
@@ -180,17 +197,23 @@ class GoogleSignInView(APIView):
                 }},
                 overwrite = False
             ).execute()
-        
-        # change uuid search key to google search key
-        elif 'uuid' in user_info['sk']:
-            User.update(
-                pk = 'USER', sk = user_info['sk'],
-                expressions = [{
-                    'utype' : 'SET', 'path' : 'sk', 'value' : f"google#{idinfo['sub']}",
-                    'overwrite' : True
-                }]
-            )
+
+        else:
+            result['user_exists'] = True
+            result['nickname'] = user_info['User']
+            
+            # change uuid search key to google search key
+            if 'uuid' in user_info['sk']:
+                User.update(
+                    pk = 'USER', sk = user_info['sk'],
+                    expressions = [{
+                        'utype' : 'SET', 'path' : 'sk', 'value' : f"google#{idinfo['sub']}",
+                        'overwrite' : True
+                    }]
+                )
+                
         request.session['user_sk'] = f"google#{idinfo['sub']}"
         request.session['google_access_token'] = idinfo['access_token']
         
+        print(result)
         return Response(result, status = status.HTTP_200_OK)
